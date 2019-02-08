@@ -1,0 +1,17 @@
+body {
+    font-family: 'Oswald', sans-serif;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+p {
+    font-family: 'PT Sans', sans-serif;
+}
+
+#nav {
+    float: right;
+    margin-right: 0.4rem;
+  }
