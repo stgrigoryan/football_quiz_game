@@ -3,6 +3,9 @@ const mongoose = require('mongoose');
 const QuestionSchema = new mongoose.Schema ({
     content: {
         type: String
+    },
+    queueNumber: {
+        type: Number
     }
 });
 
