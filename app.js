@@ -2,18 +2,29 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const passport = require('passport');
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const path = require('path');
 const fs = require('fs');
 const ejs = require('ejs');
 const routes = require('./routes/index');
 
-const Question = require('./models/question');
-const Answer = require('./models/answer');
+/* const Question = require('models/question');
+const Answer = require('models/question'); */
 
 const app = express();
 
 //Define a port
 const port = process.env.PORT || 8000;
+
+//Using bodyparser
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+
+//Cookies setup
+app.use(cookieParser());
 
 //View Engine Setup
 app.set('views', path.join(__dirname, 'views'));
@@ -68,7 +79,6 @@ fs.readFile('questions.json', 'utf-8', (err, data) => {
                 queueNumber: obj.question_5.queueNumber
             },
         };
-        //console.log(questions.question_1);
         Question.insertMany([
             questions.question_1,
             questions.question_2,
@@ -104,38 +114,3 @@ fs.readFile('questions.json', 'utf-8', (err, data) => {
     }
     
 })
-    
-
-/* fs.readFile('questions.json', 'utf-8', (err, data) => {
-    if (err) {
-        if (err.code === 'ENOENT') {
-            console.error('File does not exist');
-            return;
-        } else {
-            throw err;
-        }
-    } else {
-        const obj = JSON.parse(data);
-        console.log(obj);
-        const question_1 = {
-            content : obj.question_1.content
-        }
-        
-        Question.create({ content: question_1.content })
-            .then((doc) => {
-                //console.log(doc._id);
-                Answer.insertMany([
-                    { question: doc._id, answer: obj.question_1.answer_1.answer, correct: obj.question_1.answer_1.correct },
-                    { question: doc._id, answer: obj.question_1.answer_2.answer, correct: obj.question_1.answer_2.correct },
-                    { question: doc._id, answer: obj.question_1.answer_3.answer, correct: obj.question_1.answer_3.correct },
-                ]).then((doc) => {
-                    console.log("AAA" + doc[1]._id)
-                    fs.unlink('questions.json', (err) => {
-                        if (err) throw err;
-                        console.log('file was deleted');
-                    }); 
-                 })
-            })
-            .catch(err => { console.log(err) });
-    }
-}); */
