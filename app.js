@@ -3,14 +3,13 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const passport = require('passport');
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
 const path = require('path');
 const fs = require('fs');
 const ejs = require('ejs');
 const routes = require('./routes/index');
 
-/* const Question = require('models/question');
-const Answer = require('models/question'); */
+const Question = require('./models/question');
+const Answer = require('./models/question');
 
 const app = express();
 
@@ -22,9 +21,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
 }));
-
-//Cookies setup
-app.use(cookieParser());
 
 //View Engine Setup
 app.set('views', path.join(__dirname, 'views'));
@@ -114,3 +110,8 @@ fs.readFile('questions.json', 'utf-8', (err, data) => {
     }
     
 })
+
+/* fs.readdir('./public/images/2', (err, files) => {
+    if (err) throw err;
+    console.log(files);
+}) */
