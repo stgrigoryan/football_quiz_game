@@ -5,7 +5,9 @@ btnRegister.addEventListener('click', function(){
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
         const xhr = new XMLHttpRequest();
-        xhr.onload = function () { }; 
+        xhr.onload = function () {
+            window.location.assign('/login');
+        }; 
         xhr.open('POST', '/register', true);
         xhr.setRequestHeader('Content-type','application/json; charset=utf-8');
         const obj = {
@@ -14,8 +16,7 @@ btnRegister.addEventListener('click', function(){
             confirmPassword: confirmPassword
         };
         const json = JSON.stringify(obj);
-        console.log(obj);
         xhr.send(json);
-        //return false;
+        return false;
 
     }, true);

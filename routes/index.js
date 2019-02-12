@@ -1,13 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const path = require('path');
-const fs = require('fs');
 const passport = require('passport');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
-const Question = require('../models/question');
-const Answer = require('../models/answer');
+const passportConf = require('../config/auth.js');
 const User = require('../models/user');
 
 router.get('/', (req, res) => {
@@ -49,7 +47,7 @@ router.post('/register', (req, res) => {
                         newUser.password = hash;
                         newUser.save()
                             .then(user => {
-                                res.redirect('login');
+                                res.send('User saved');
                             })
                             .catch(err => (console.log(err)));
                     }));
@@ -58,70 +56,23 @@ router.post('/register', (req, res) => {
 });
 
 router.post('/login', (req, res) => {
-    console.log(req.body);
-});
-
-router.get('/play', (req, res) => {
-    let content;
-
-    Question.findOne({ queueNumber: 1 })
-        .then(doc => {
-            content = doc.content;
-            console.log("ahahaha");
-            res.render('play', {
-                username: 'Shmavon',
-                content: content
-            });
-        })
-});
-
-router.post('/questions', (req, res) => {
-    let content;
-    const answer = req.body.path;
-    let queueNumber = 1;
-    let images;
-    Answer.findOne({ answer: answer })
-        .then(doc => {
-            if (doc.correct === true) {
-                ++queueNumber;
-                Question.findOne({ queueNumber: queueNumber })
-                    .then(doc => {
-                        //console.log(queueNumber);
-                        content = doc.content;
-                        const filePath = path.join(__dirname + `../../public/images/${queueNumber}`);
-                        //queueNumber = ++doc.queueNumber;
-                        fs.readdirAsync = function (dirname) {
-                            return new Promise(function (resolve, reject) {
-                                fs.readdir(dirname, function (err, filenames) {
-                                    if (err)
-                                        reject(err);
-                                    else
-                                        resolve(filenames);
-                                });
-                            });
-                        };
-                        fs.readdirAsync(filePath).then(filenames => {
-                            images = filenames;
-                            console.log(images);
-                            res.json({
-                                username: 'Shmavon',
-                                content: content,
-                                queueNumber: queueNumber,
-                                images: images
-                            });
-                            ++queueNumber
-                            console.log(queueNumber);
-                        });
-                    });
-            } else {
-
-                //console.log(images);
-                res.json({
-                    username: "Argam",
-                    content: 'Answer is not correct',
-                });
+    User.findOne({username: req.body.username})
+        .then(user => {
+            if (!user) {
+                return res.json({ message: 'Incorrect or not registered username.' });
             }
+            bcrypt.compare(req.body.password, user.password, (err, isMatch) => {
+                if (err) throw err;
+                if (isMatch) {
+                    const body = { _id : user._id};
+                    const token = jwt.sign({ user : body },'rugby_kat', {expiresIn: 604800});
+                    return res.json({token: token});
+                } else {
+                    return res.json({msg: 'Something went wrong'});
+                }
+            });
         });
+
 });
 
 module.exports = router;

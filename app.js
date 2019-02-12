@@ -6,10 +6,16 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const fs = require('fs');
 const ejs = require('ejs');
-const routes = require('./routes/index');
+
+
+const index = require('./routes/index');
+const user = require('./routes/users');
+
 
 const Question = require('./models/question');
 const Answer = require('./models/question');
+
+require('./config/auth')(passport);
 
 const app = express();
 
@@ -29,6 +35,9 @@ app.set('view engine', 'ejs');
 //Serve static files
 app.use(express.static(path.join(__dirname, '/public')));
 
+// Passport middleware
+app.use(passport.initialize());
+
 //Create MongoDB connection
 mongoose.connect('mongodb://localhost:27017/footballDB', {
     useNewUrlParser: true
@@ -38,7 +47,9 @@ mongoose.connect('mongodb://localhost:27017/footballDB', {
     .catch(err => { console.log(err) });
 
 //Define routes
-app.use('/', routes);
+app.use('/', index);
+//app.use('/user', user);
+app.use('/user', passport.authenticate('jwt', {session: false}), user);
 
 //Start server
 app.listen(port, () => { console.log(`Server started on port ${port}`) });
@@ -99,7 +110,6 @@ fs.readFile('questions.json', 'utf-8', (err, data) => {
                 { question: doc[4]._id, answer: obj.question_5.answer_2.answer, correct: obj.question_5.answer_2.correct },
                 { question: doc[4]._id, answer: obj.question_5.answer_3.answer, correct: obj.question_5.answer_3.correct },
             ]).then ((doc) => {
-                console.log(doc);
                 fs.unlink('questions.json', (err) => {
                     if (err) throw err;
                     console.log('file was deleted');
@@ -110,8 +120,3 @@ fs.readFile('questions.json', 'utf-8', (err, data) => {
     }
     
 })
-
-/* fs.readdir('./public/images/2', (err, files) => {
-    if (err) throw err;
-    console.log(files);
-}) */
